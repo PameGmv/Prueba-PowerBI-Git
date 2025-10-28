@@ -60,7 +60,7 @@
             "startDate": {
               "expr": {
                 "Literal": {
-                  "Value": "datetime'2025-09-23T00:09:19.186'"
+                  "Value": "datetime'2025-01-22T19:14:58.950'"
                 }
               }
             },
@@ -140,7 +140,7 @@
                             },
                             "Right": {
                               "Literal": {
-                                "Value": "datetime'2025-09-23T00:00:00'"
+                                "Value": "datetime'2025-01-22T00:00:00'"
                               }
                             }
                           }
