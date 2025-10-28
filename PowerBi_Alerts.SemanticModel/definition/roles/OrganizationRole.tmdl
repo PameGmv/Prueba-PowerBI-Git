@@ -1,7 +1,0 @@
-role OrganizationRole
-	modelPermission: read
-
-	tablePermission DimUserOrganization = [UserName] = LEFT( USERPRINCIPALNAME(),SEARCH("@", USERPRINCIPALNAME()) - 1)
-
-	annotation PBI_Id = 791687dc234c4bc895e9fb4286106951
-
