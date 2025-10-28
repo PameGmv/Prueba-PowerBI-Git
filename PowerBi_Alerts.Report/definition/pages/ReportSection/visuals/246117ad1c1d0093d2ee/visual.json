@@ -1,0 +1,122 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "246117ad1c1d0093d2ee",
+  "position": {
+    "x": 1358.0246913580247,
+    "y": 537.77777777777783,
+    "z": 27001,
+    "height": 279.75308641975312,
+    "width": 365.30864197530866,
+    "tabOrder": 27001
+  },
+  "visual": {
+    "visualType": "donutChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "KeysTable"
+                    }
+                  },
+                  "Property": "Priority_desc"
+                }
+              },
+              "queryRef": "KeysTable.Priority_desc",
+              "nativeQueryRef": "Priority_desc",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "KeysTable"
+                        }
+                      },
+                      "Property": "Priority_desc"
+                    }
+                  },
+                  "Function": 5
+                }
+              },
+              "queryRef": "CountNonNull(KeysTable.Priority_desc)",
+              "nativeQueryRef": "Count of Priority_desc"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "KeysTable"
+                      }
+                    },
+                    "Property": "Priority_desc"
+                  }
+                },
+                "Function": 5
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "31396a27edbcbc24d822",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KeysTable"
+              }
+            },
+            "Property": "Priority_desc"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "2348db2a5b0797b6f994",
+        "field": {
+          "Aggregation": {
+            "Expression": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "KeysTable"
+                  }
+                },
+                "Property": "Priority_desc"
+              }
+            },
+            "Function": 5
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}
