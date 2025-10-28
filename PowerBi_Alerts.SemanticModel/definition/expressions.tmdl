@@ -12,7 +12,7 @@ expression Database = "suiteaivnext_DataWarehouse" meta [IsParameterQuery=true, 
 
 	annotation PBI_NavigationStepName = Navegación
 
-expression DataFilter = 0 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
+expression DataFilter = 1 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
 	lineageTag: 14700739-203d-41db-990c-b798cd6f1fe5
 
 	annotation PBI_ResultType = Number
