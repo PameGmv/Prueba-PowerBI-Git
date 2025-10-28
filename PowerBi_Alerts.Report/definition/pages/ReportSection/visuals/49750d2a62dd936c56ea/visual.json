@@ -410,6 +410,20 @@
         "type": "Categorical",
         "howCreated": "User",
         "isHiddenInViewMode": true
+      },
+      {
+        "name": "9fd14de589132a5908cc",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "FacAlertNotification"
+              }
+            },
+            "Property": "MessageText"
+          }
+        },
+        "type": "Categorical"
       }
     ]
   }
