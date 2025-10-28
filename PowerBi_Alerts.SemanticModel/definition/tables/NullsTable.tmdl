@@ -1,0 +1,43 @@
+table NullsTable
+	lineageTag: e0d94921-0540-41a2-82e2-f869c0d974ea
+
+	column Language
+		dataType: string
+		lineageTag: eddc5774-61ee-401f-86a9-6273350ac240
+		summarizeBy: none
+		sourceColumn: Language
+
+		annotation SummarizationSetBy = Automatic
+
+	column Key
+		dataType: string
+		lineageTag: ce8b2ef8-dca4-4be2-93fe-01c393d1e013
+		summarizeBy: none
+		sourceColumn: Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: string
+		lineageTag: 71241385-f2c1-4a9e-92cb-64ec814fe82e
+		summarizeBy: none
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+	partition NullsTable = m
+		mode: import
+		source =
+				let
+				    Languages = LanguagesMapping,
+				    #"Columnas quitadas" = Table.RemoveColumns(Languages,{"Language"}),
+				    #"Personalizada agregada" = Table.AddColumn(#"Columnas quitadas", "Key", each ""),
+				    #"Personalizada agregada1" = Table.AddColumn(#"Personalizada agregada", "Value", each ""),
+				    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Personalizada agregada1",{{"LanguageMapping", "Language"}})
+				in
+				    #"Columnas con nombre cambiado"
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

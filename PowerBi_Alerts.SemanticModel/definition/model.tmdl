@@ -1,0 +1,37 @@
+model Model
+	culture: es-ES
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["FacAlertNotification","DimVehicle","DimOrganization","Resources","MeasuresTable","PriorityTypes","KeysTable","Server","Database","CategoryTable","Resources_ResourceKey","DimUserOrganization","DataFilter","FacAlertNotification2","ResourceKeys","Categories","Category_Key","Keys","LanguagesMapping","NullsTable"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table FacAlertNotification
+ref table DimVehicle
+ref table DimOrganization
+ref table Resources
+ref table MeasuresTable
+ref table PriorityTypes
+ref table KeysTable
+ref table CategoryTable
+ref table Resources_ResourceKey
+ref table DimUserOrganization
+ref table FacAlertNotification2
+ref table ResourceKeys
+ref table Categories
+ref table Category_Key
+ref table Keys
+ref table LanguagesMapping
+ref table NullsTable
+
+ref role OrganizationRole
+ref role SuperAdmin
+
+ref cultureInfo es-ES
+

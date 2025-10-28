@@ -1,0 +1,27 @@
+table Categories
+	lineageTag: f2a1ef1f-dfef-4c43-b0e5-74b5a1435651
+
+	column Category
+		dataType: string
+		lineageTag: f1628405-181f-464e-b0f1-6cb18e1f3c7c
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Categories = m
+		mode: import
+		source =
+				let
+				    Origen = FacAlertNotification2,
+				    Personalizado1 = Table.SelectColumns(Table.Distinct(#"Origen", {"Category"}),{"Category"}),
+				    #"Personalizada agregada" = Table.AddColumn(#"Personalizado1", "FiltroDatos", each 0),
+				    FiltroDatos = Table.SelectRows(#"Personalizada agregada", each [FiltroDatos] = DataFilter),
+				    #"Columnas quitadas1" = Table.RemoveColumns(FiltroDatos,{"FiltroDatos"})
+				in
+				    #"Columnas quitadas1"
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

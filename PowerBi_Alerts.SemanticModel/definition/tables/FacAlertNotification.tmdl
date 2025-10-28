@@ -1,0 +1,197 @@
+table FacAlertNotification
+	lineageTag: 1fe8e0df-4c77-4609-9e92-95bbd65f2dc1
+
+	measure AcumuladoEventosS = COUNTROWS(FacAlertNotification) + 0
+		formatString: 0
+		lineageTag: 69ec0af6-f2ce-4ece-a574-78c5a48ab3eb
+
+	column AlertNotificationId
+		dataType: string
+		lineageTag: 434012ea-d45f-4d30-afaa-a02784d15cb8
+		summarizeBy: none
+		sourceColumn: AlertNotificationId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 3c0a4749-4661-4ac8-ad94-f769d987b984
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Key
+		dataType: string
+		lineageTag: f36613d7-fc63-436f-be25-523b1b456c8a
+		summarizeBy: none
+		sourceColumn: Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column VehicleFk
+		dataType: int64
+		formatString: 0
+		lineageTag: cd4627fc-089c-4b22-b7a4-ad772859a77d
+		summarizeBy: none
+		sourceColumn: VehicleFk
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrganizationAppId
+		dataType: string
+		lineageTag: 0a492b92-bc0b-4ccb-8225-93d73dfd2890
+		summarizeBy: none
+		sourceColumn: OrganizationAppId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4d81242a-e13e-4b8b-8001-9ea757649dac
+		summarizeBy: none
+		sourceColumn: Timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: string
+		lineageTag: 62aa5516-f185-418a-9239-5e1b1f863983
+		summarizeBy: none
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResourceKey
+		dataType: string
+		lineageTag: 9d86dd7b-6e76-4f82-b2d4-f7a2c0bdbc7d
+		summarizeBy: none
+		sourceColumn: ResourceKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResourceParameters
+		dataType: string
+		lineageTag: d5612857-209e-450d-b6ee-6ecfa4f3bda0
+		summarizeBy: none
+		sourceColumn: ResourceParameters
+
+		annotation SummarizationSetBy = Automatic
+
+	column InsertDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 124e43d9-0c41-4213-9883-f0995c6dc0bd
+		summarizeBy: none
+		sourceColumn: InsertDate
+
+		annotation SummarizationSetBy = Automatic
+
+	column AlertNotificationPk
+		dataType: int64
+		formatString: 0
+		lineageTag: e541ba43-1244-47e9-b27b-f27c598c190e
+		summarizeBy: sum
+		sourceColumn: AlertNotificationPk
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResourceParameters_Text =
+			
+			VAR StartPos = FIND("[", FacAlertNotification[ResourceParameters], 1) + 2
+			VAR EndPos = FIND("]", FacAlertNotification[ResourceParameters], StartPos) - 2
+			RETURN IF(FacAlertNotification[ResourceParameters] == "[]", "-", MID(FacAlertNotification[ResourceParameters], StartPos, EndPos - StartPos + 1))
+		lineageTag: 7b702611-ed8c-4448-a825-dea87c0ca56c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority
+		dataType: int64
+		formatString: 0
+		lineageTag: 72850bcc-4b8f-4733-96ca-c1d4a6c0743d
+		summarizeBy: sum
+		sourceColumn: Priority
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority_Key_ResKey
+		dataType: string
+		lineageTag: ba38a1af-4790-4c4e-a04a-8f5ae19c8f12
+		summarizeBy: none
+		sourceColumn: Priority_Key_ResKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'KeysTable.Language'
+		dataType: string
+		lineageTag: d5035847-0b56-49d0-8d79-dc4e48286755
+		summarizeBy: none
+		sourceColumn: KeysTable.Language
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'KeysTable.Resources_ResourceKey.Value'
+		dataType: string
+		lineageTag: 9b5ed735-80e6-4a50-b42e-46ebe8e470dd
+		summarizeBy: none
+		sourceColumn: KeysTable.Resources_ResourceKey.Value
+
+		annotation SummarizationSetBy = Automatic
+
+	column Lang_Priority_Key_ResKey
+		dataType: string
+		lineageTag: 79935782-e8fe-4c30-9a81-5486da15cf35
+		summarizeBy: none
+		sourceColumn: Lang_Priority_Key_ResKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column MessageText
+		dataType: string
+		lineageTag: 03725483-3072-4ebc-8518-2258ffcf0b00
+		summarizeBy: none
+		sourceColumn: MessageText
+
+		annotation SummarizationSetBy = Automatic
+
+	partition FacAlertNotification-8dc2714e-6ea9-49ee-bbcd-f3d8173bc73b = m
+		mode: import
+		source = ```
+				let
+				    Origen = Sql.Database(Server, Database),
+				    dbo_DimAlertNotification = Origen{[Schema="dbo",Item="FacAlertNotification"]}[Data],
+				    #"Personalizada agregada" = Table.AddColumn(dbo_DimAlertNotification, "Priority_Key_ResKey", each if [ResourceKey] <> null 
+				then Text.From([Priority]) & "_" & Text.From([Key]) & "_" &Text.From([ResourceKey]) 
+				else Text.From([Priority]) & "_" & Text.From([Key]) & "_"),
+				    #"Consultas combinadas" = Table.NestedJoin(#"Personalizada agregada", {"Priority_Key_ResKey"}, KeysTable, {"Priority_Key_ResKey"}, "KeysTable", JoinKind.LeftOuter),
+				    #"Se expandió KeysTable" = Table.ExpandTableColumn(#"Consultas combinadas", "KeysTable", {"Language", "Resources_ResourceKey.Value"}, {"KeysTable.Language", "KeysTable.Resources_ResourceKey.Value"}),
+				    #"Personalizada agregada1" = Table.AddColumn(#"Se expandió KeysTable", "Lang_Priority_Key_ResKey", each if [ResourceKey] <> null 
+				then Text.From([KeysTable.Language]) & "_" & Text.From([Priority]) & "_" & Text.From([Key]) & "_" & Text.From([ResourceKey]) 
+				else Text.From([KeysTable.Language]) & "_" & Text.From([Priority]) & "_" & Text.From([Key]) & "_"),
+				    Personalizado1 = Table.AddColumn(#"Personalizada agregada1", "MessageText", each 
+				    let
+				        CleanedResourceParameters = Text.Remove([ResourceParameters], {"]", "["}),
+				        ReplacePlaceholders = (value, parameters) =>
+				            List.Accumulate(
+				                List.Positions(parameters),
+				                value,
+				                (state, i) => Text.Replace(state, "{" & Text.From(i) & "}", parameters{i})
+				            ),
+				        CombinedValue = ReplacePlaceholders([KeysTable.Resources_ResourceKey.Value], Text.Split(CleanedResourceParameters, ",")),
+				        FinalValue = Text.Replace(CombinedValue, """", "")
+				    in
+				        FinalValue
+				),
+				    #"Personalizada agregada2" = Table.AddColumn(Personalizado1, "FiltroDatos", each 0),
+				    FiltroDatos = Table.SelectRows(#"Personalizada agregada2", each [FiltroDatos] = DataFilter),
+				    #"Columnas quitadas" = Table.RemoveColumns(FiltroDatos,{"FiltroDatos"})
+				in
+				    #"Columnas quitadas"
+				```
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navegación
+

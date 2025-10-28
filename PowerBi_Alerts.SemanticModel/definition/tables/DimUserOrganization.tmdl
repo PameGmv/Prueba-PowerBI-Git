@@ -1,0 +1,35 @@
+table DimUserOrganization
+	lineageTag: d85c9fba-7622-4ac7-b464-403add67e8eb
+
+	column UserName
+		dataType: string
+		lineageTag: b57ae877-457f-4b8a-8db5-02160eee3cc3
+		summarizeBy: none
+		sourceColumn: UserName
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrganizationAppId
+		dataType: string
+		lineageTag: 62c0f439-ca04-4285-98aa-09085112ffcd
+		summarizeBy: none
+		sourceColumn: OrganizationAppId
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimUserOrganization = m
+		mode: import
+		source =
+				let
+				    Origen = Sql.Database(Server, Database),
+				    dbo_DimUserOrganization = Origen{[Schema="dbo",Item="DimUserOrganization"]}[Data],
+				    #"Personalizada agregada" = Table.AddColumn(dbo_DimUserOrganization, "FiltroDatos", each 0),
+				    FiltroDatos = Table.SelectRows(#"Personalizada agregada", each [FiltroDatos] = DataFilter),
+				    #"Columnas quitadas" = Table.RemoveColumns(FiltroDatos,{"FiltroDatos"})
+				in
+				    #"Columnas quitadas"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navegación
+

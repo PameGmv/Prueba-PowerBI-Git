@@ -1,0 +1,143 @@
+table KeysTable
+	lineageTag: dc061f4f-6db3-4649-81a7-2e7266fc7956
+
+	column Language
+		dataType: string
+		lineageTag: 552eb2d5-7c26-40e8-8fd8-7fdc15e56cce
+		summarizeBy: none
+		sourceColumn: Language
+
+		annotation SummarizationSetBy = Automatic
+
+	column Key
+		dataType: string
+		lineageTag: e514bda0-abd6-426b-96c0-495cccf3e06b
+		summarizeBy: none
+		sourceColumn: Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Key_desc
+		dataType: string
+		lineageTag: 865262cf-73a8-43e2-a0e7-0ff2828edd5b
+		summarizeBy: none
+		sourceColumn: Key_desc
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Lang_category = KeysTable[Language] & "_" & KeysTable[Category]
+		lineageTag: 62cd717d-5a39-41eb-8d4c-5739622e79cb
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority_desc
+		dataType: string
+		lineageTag: 7bc2466e-dc40-4c69-bdcd-8614f449030d
+		summarizeBy: none
+		sourceColumn: Priority_desc
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority_n
+		dataType: string
+		lineageTag: 221e8f53-1118-4c2b-ad18-7813ad8a6448
+		summarizeBy: none
+		sourceColumn: Priority_n
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority_Key_ResourceKey = KeysTable[Priority_n] & "_" & KeysTable[Key] & "_" & KeysTable[Resources_ResourceKey.Key]
+		lineageTag: f192633b-e22d-4c53-bc40-1839d8f72a9b
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resources_ResourceKey.Key'
+		dataType: string
+		lineageTag: 64454a9f-066e-4a81-8ac0-f7155776e134
+		summarizeBy: none
+		sourceColumn: Resources_ResourceKey.Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resources_ResourceKey.Value'
+		dataType: string
+		lineageTag: 1e9117ef-0efb-40eb-a547-30d01860ae2f
+		summarizeBy: none
+		sourceColumn: Resources_ResourceKey.Value
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority_Key_ResKey
+		dataType: string
+		lineageTag: e5ca0b7b-fa3e-4b27-8dbe-9e0fd21094b4
+		summarizeBy: none
+		sourceColumn: Priority_Key_ResKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Lang_Priority_Key_ResKey
+		dataType: string
+		lineageTag: 4a971cd2-d295-4a69-b568-90cb8704738c
+		summarizeBy: none
+		sourceColumn: Lang_Priority_Key_ResKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 52923488-5496-448f-b75c-c4060fa6130a
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition KeysTable-b5c37e91-ee73-40ab-b166-85ed80dd96c1 = m
+		mode: import
+		source =
+				let
+				    Origen = Sql.Database(Server, Database),
+				    dbo_Resources = Origen{[Schema="dbo",Item="Resources"]}[Data],
+				    #"Consultas combinadas" = Table.NestedJoin(dbo_Resources, {"Language"}, LanguagesMapping, {"Language"}, "LanguagesMapping", JoinKind.Inner),
+				    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Consultas combinadas",{{"Language", "Language_ac"}}),
+				    #"Se expandió LanguagesMapping" = Table.ExpandTableColumn(#"Columnas con nombre cambiado", "LanguagesMapping", {"LanguageMapping"}, {"Language"}),
+				    #"Columnas quitadas1" = Table.RemoveColumns(#"Se expandió LanguagesMapping",{"Language_ac"}),
+				
+				    #"Selección de recursos" = Table.TransformColumns(
+				    Table.SelectRows(
+				        #"Columnas quitadas1",
+				        each Text.StartsWith([Key], "Notifications_")
+				    ),
+				    {"Key", each Text.Replace(_, "Notifications_", "")}
+				),
+				    #"Filtered Rows" = Table.SelectRows(#"Selección de recursos", each ([Key] <> "FullVehicleOccupancyAlert")),
+				    #"Remplazar Type -> ''" = Table.ReplaceValue(#"Filtered Rows","Type","",Replacer.ReplaceText,{"Key"}),
+				    #"EmergencyButtonAlert->EmergencyButton" = Table.ReplaceValue(#"Remplazar Type -> ''","EmergencyButtonAlert","EmergencyButton",Replacer.ReplaceText,{"Key"}),
+				    #"OccupancyAlert -> Occupancy" = Table.ReplaceValue(#"EmergencyButtonAlert->EmergencyButton","OccupancyAlert","Occupancy",Replacer.ReplaceText,{"Key"}),
+				    #"Union con Keys" = Table.NestedJoin(#"OccupancyAlert -> Occupancy", {"Key"}, Keys, {"Key"}, "Keys", JoinKind.Inner),
+				    #"Columnas quitadas" = Table.RemoveColumns(#"Union con Keys",{"Keys"}),
+				    #"Columnas con nombre cambiado5" = Table.RenameColumns(#"Columnas quitadas",{{"Value", "Key_desc"}}),
+				    #"Consultas combinadas5" = Table.NestedJoin(#"Columnas con nombre cambiado5", {"Language"}, PriorityTypes, {"Language"}, "PriorityTypes", JoinKind.LeftOuter),
+				    #"Se expandió PriorityTypes" = Table.ExpandTableColumn(#"Consultas combinadas5", "PriorityTypes", {"Priority_description", "Priority_n"}, {"PriorityTypes.Priority_description", "PriorityTypes.Priority_n"}),
+				    #"Columnas con nombre cambiado1" = Table.RenameColumns(#"Se expandió PriorityTypes",{{"PriorityTypes.Priority_n", "Priority_n"}, {"PriorityTypes.Priority_description", "Priority_desc"}}),
+				    #"Consultas combinadas1" = Table.NestedJoin(#"Columnas con nombre cambiado1", {"Language"}, Resources_ResourceKey, {"Language"}, "Resources_ResourceKey", JoinKind.LeftOuter),
+				    #"Se expandió Resources_ResourceKey" = Table.ExpandTableColumn(#"Consultas combinadas1", "Resources_ResourceKey", {"Key", "Value"}, {"Resources_ResourceKey.Key", "Resources_ResourceKey.Value"}),
+				    #"Valor reemplazado3" = Table.ReplaceValue(#"Se expandió Resources_ResourceKey","EmergencyButtonAlert","EmergencyButton",Replacer.ReplaceText,{"Key"}),
+				    #"Personalizada agregada" = Table.AddColumn(#"Valor reemplazado3", "Priority_Key_ResKey", each Text.From([Priority_n]) & "_" & Text.From([Key]) & "_" & Text.From([Resources_ResourceKey.Key])),
+				    #"Personalizada agregada1" = Table.AddColumn(#"Personalizada agregada", "Lang_Priority_Key_ResKey", each Text.From([Language]) & "_" & Text.From([Priority_n]) & "_" & Text.From([Key]) & "_" & Text.From([Resources_ResourceKey.Key])),
+				    #"Consultas combinadas3" = Table.NestedJoin(#"Personalizada agregada1", {"Key"}, Category_Key, {"Key"}, "Category_Key", JoinKind.LeftOuter),
+				    #"Se expandió Category_Key" = Table.ExpandTableColumn(#"Consultas combinadas3", "Category_Key", {"Category"}, {"Category_Key.Category"}),
+				    #"Columnas con nombre cambiado3" = Table.RenameColumns(#"Se expandió Category_Key",{{"Category_Key.Category", "Category"}}),
+				    #"Personalizada agregada3" = Table.AddColumn(#"Columnas con nombre cambiado3", "FiltroDatos", each 0),
+				    FiltroDatos = Table.SelectRows(#"Personalizada agregada3", each [FiltroDatos] = DataFilter),
+				    #"Columnas quitadas5" = Table.RemoveColumns(FiltroDatos,{"FiltroDatos"})
+				in
+				    #"Columnas quitadas5"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navegación
+

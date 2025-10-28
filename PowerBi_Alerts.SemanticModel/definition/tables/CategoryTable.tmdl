@@ -1,0 +1,66 @@
+table CategoryTable
+	lineageTag: 5ae25e36-7c89-4e55-bb22-34fc4986145a
+
+	column Language
+		dataType: string
+		lineageTag: e203a95a-e71e-4d11-8cef-b787d2417b8a
+		summarizeBy: none
+		sourceColumn: Language
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 439860e5-8e5d-4172-83c7-f4928d4becec
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category_desc
+		dataType: string
+		lineageTag: 6c9b82db-b6f2-4b70-b56a-b161707b666b
+		summarizeBy: none
+		sourceColumn: Category_desc
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Lang_Category = CategoryTable[Language] & "_" & CategoryTable[Category]
+		lineageTag: d408043d-98d7-4d6a-8a71-de08a08c8145
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition CategoryTable-f88e4a8c-c6a8-464f-a89a-05a39cf47e98 = m
+		mode: import
+		source =
+				let
+				    Origen = Sql.Database(Server, Database),
+				    dbo_Resources = Origen{[Schema="dbo",Item="Resources"]}[Data],
+				     #"Consultas combinadas" = Table.NestedJoin(dbo_Resources, {"Language"}, LanguagesMapping, {"Language"}, "LanguagesMapping", JoinKind.Inner),
+				    #"Columnas con nombre cambiado" = Table.RenameColumns(#"Consultas combinadas",{{"Language", "Language_ac"}}),
+				    #"Se expandió LanguagesMapping" = Table.ExpandTableColumn(#"Columnas con nombre cambiado", "LanguagesMapping", {"LanguageMapping"}, {"Language"}),
+				    #"Columnas quitadas1" = Table.RemoveColumns(#"Se expandió LanguagesMapping",{"Language_ac"}),
+				
+				    #"Selección de recursos" = Table.TransformColumns(
+				    Table.SelectRows(
+				        #"Columnas quitadas1",
+				        each Text.StartsWith([Key], "Notifications_")
+				    ),
+				    {"Key", each Text.Replace(_, "Notifications_", "")}
+				),
+				    #"Union Categories" = Table.NestedJoin(#"Selección de recursos", {"Key"}, Categories, {"Category"}, "Categorys", JoinKind.Inner),
+				    #"Columnas quitadas" = Table.RemoveColumns(#"Union Categories",{"Categorys"}),
+				    #"Columnas con nombre cambiado3" = Table.RenameColumns(#"Columnas quitadas",{{"Key", "Category"}, {"Value", "Category_desc"}}),
+				    #"Personalizada agregada" = Table.AddColumn(#"Columnas con nombre cambiado3", "FiltroDatos", each 0),
+				    FiltroDatos = Table.SelectRows(#"Personalizada agregada", each [FiltroDatos] = DataFilter),
+				    #"Columnas quitadas2" = Table.RemoveColumns(FiltroDatos,{"FiltroDatos"})
+				in
+				    #"Columnas quitadas2"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navegación
+
